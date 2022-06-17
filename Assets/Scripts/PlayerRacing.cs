@@ -4,8 +4,11 @@ using UnityEngine;
 
 public class PlayerRacing : MonoBehaviour
 {
-    public float speed = 1f;
+    public float maxSpeed = 1f;
+    public float minSpeed = 0.9f;
     public int tokenId;
+    public bool canJump = false;
+    public GameObject target;
 
     SpriteRenderer spriteRenderer;
     Rigidbody2D rb;
@@ -17,6 +20,11 @@ public class PlayerRacing : MonoBehaviour
     private float dashCoolCounter;
     private bool onDash = false;
     private float dashSpeed = 1.6f;
+    private bool isJumping = false;
+    private int index = 0;
+    private float changeSeason = 10f;
+    private float timeSinceLastChangeSeason = 0;
+    private float[] speeds = { 1.03f, 1.05f, 0.95f, 0.98f, 1.1f, 1.04f, 0.97f, 1.03f };
 
     // Start is called before the first frame update
     void Start()
@@ -29,6 +37,13 @@ public class PlayerRacing : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        timeSinceLastChangeSeason += Time.deltaTime;
+        if (timeSinceLastChangeSeason > changeSeason)
+        {
+            timeSinceLastChangeSeason = 0f;
+            index++;
+        }
+        float speed = speeds[index];
         //animator.SetBool("isMoving", true);
         //if (Input.GetKey(KeyCode.Space))
         //{
@@ -44,7 +59,9 @@ public class PlayerRacing : MonoBehaviour
 
         //    }
         //}
+
         transform.Translate(Vector2.up * speed * Time.deltaTime);
+
         //if (gameObject.name == "7_0 (1)")
         //{
         //    print(activeMoveSpeed);
@@ -64,5 +81,18 @@ public class PlayerRacing : MonoBehaviour
         //{
         //    dashCoolCounter -= Time.deltaTime;
         //}
+        if (canJump)
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                isJumping = true;
+                animator.SetTrigger("jump");
+            }
+        }
+    }
+
+    public void ResetJump()
+    {
+        animator.ResetTrigger("jump");
     }
 }
