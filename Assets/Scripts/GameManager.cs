@@ -21,8 +21,12 @@ public class GameManager : MonoBehaviour
     private float number3MinSpeed = 0.87f;
     private float othersMaxSpeed = 1.03f;
     private float othersMinSpeed = 0.84f;
+    private float[] number1Speeds = { 0.94f, 1f, 1.05f, 1.06f, 1.05f, 1.04f, 0.97f, 1.03f };
+    private float[] number2Speeds = { 1.05f, 0.98f, 0.95f, 1.1f, 0.9f, 0.95f, 0.97f, 1.2f };
+    private float[] number3Speeds = { 1.03f, 1.05f, 0.95f, 0.98f, 1.1f, 1.04f, 0.97f, 1.03f };
+    private float[] otherSpeeds = { 1.03f, 1.05f, 0.95f, 0.98f, 1.1f, 1.04f, 0.97f, 1.03f };
 
-    private void Start()
+private void Start()
     {
         int index = 0;
         foreach (int item in APICall.instance.raptorsInPlay)
@@ -38,23 +42,22 @@ public class GameManager : MonoBehaviour
             {
                 if (APICall.instance.quickPlayWinner == item)
                 {
-                    player.GetComponent<PlayerRacing>().maxSpeed = number1MaxSpeed;
+                    player.GetComponent<PlayerRacing>().speeds = number1Speeds;
                     player.GetComponent<PlayerRacing>().tokenId = item;
                 } 
                 else if (APICall.instance.top3[1] == item)
                 {
-                    player.GetComponent<PlayerRacing>().maxSpeed = number2MaxSpeed;
+                    player.GetComponent<PlayerRacing>().speeds = number2Speeds;
                     player.GetComponent<PlayerRacing>().tokenId = item;
                 }
                 else if (APICall.instance.top3[2] == item)
                 {
-                    player.GetComponent<PlayerRacing>().maxSpeed = number3MaxSpeed;
+                    player.GetComponent<PlayerRacing>().speeds = number3Speeds;
                     player.GetComponent<PlayerRacing>().tokenId = item;
                 }
                 else
                 {
-                    player.GetComponent<PlayerRacing>().maxSpeed = othersMaxSpeed;
-                    player.GetComponent<PlayerRacing>().minSpeed = othersMinSpeed;
+                    player.GetComponent<PlayerRacing>().speeds = otherSpeeds;
                     player.GetComponent<PlayerRacing>().tokenId = item;
                 }
             }

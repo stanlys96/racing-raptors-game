@@ -117,23 +117,7 @@ public class APICall : MonoBehaviour
     IEnumerator GetData_Coroutine() {
         while (true) {
             raptorsInPlay = new int[8];
-            string testUri = "https://ipfs.io/ipns/ipfs.io/QmQvgt2BgLTYMVXdU8rWXaqi4jTY4CNczsxZQzboLKuxwq/1.JSON";
-            using (UnityWebRequest testRequest = UnityWebRequest.Get(testUri))
-            {
-                yield return testRequest.SendWebRequest();
-                print(testRequest);
-                if (testRequest.isNetworkError || testRequest.isHttpError)
-                {
-                    print(testRequest.error);
-                    print("???");
-                } 
-                else
-                {
-                    print("WALAO");
-                    print(testRequest.downloadHandler.text);
-                }
-            }
-            string uri = "http://test-raptor-nft-game.herokuapp.com/test/getCurrentQueue";
+            string uri = "https://test-raptor-nft-game.herokuapp.com/test/getCurrentQueue";
             using(UnityWebRequest request = UnityWebRequest.Get(uri)) 
             {
                 yield return request.SendWebRequest();
@@ -167,7 +151,7 @@ public class APICall : MonoBehaviour
                         index++;
                     }
                     if (count == 7) {
-                        string fightWinnerUri = "http://test-raptor-nft-game.herokuapp.com/test/getFightWinner";
+                        string fightWinnerUri = "https://test-raptor-nft-game.herokuapp.com/test/getFightWinner";
                         using (UnityWebRequest fightWinnerRequest = UnityWebRequest.Get(fightWinnerUri))
                         {
                             yield return fightWinnerRequest.SendWebRequest();
