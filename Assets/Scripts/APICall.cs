@@ -6,6 +6,7 @@ using UnityEngine.Networking;
 using Newtonsoft.Json;
 using UnityEngine.SceneManagement;
 using System;
+using System.Linq;
 
 [System.Serializable]
 public class Data
@@ -78,25 +79,130 @@ public class DataRaceWinner
     }
 }
 
+[System.Serializable]
+public class RaptorJsonData
+{
+    [JsonProperty("Token ID")]
+    public string TokenID;
+    public string description;
+    public string image;
+    public string external_url;
+    public string name;
+    public List<Attribute> attributes;
+
+    public static RaptorJsonData CreateFromJson(string jsonString)
+    {
+        return JsonUtility.FromJson<RaptorJsonData>(jsonString);
+    }
+}
+
+[System.Serializable]
+public class Attribute
+{
+    public string trait_type;
+    public string value;
+}
+
+
 public class APICall : MonoBehaviour
 {
     public static APICall instance;
     InputField outputArea;
     Data data;
     int[] result = new int[8];
+    [SerializeField] GameObject raptor0 = null;
     [SerializeField] GameObject raptor1 = null;
     [SerializeField] GameObject raptor2 = null;
+    [SerializeField] GameObject raptor3 = null;
+    [SerializeField] GameObject raptor4 = null;
+    [SerializeField] GameObject raptor5 = null;
+    [SerializeField] GameObject raptor6 = null;
+    [SerializeField] GameObject raptor7 = null;
+    [SerializeField] GameObject raptor8 = null;
+    [SerializeField] GameObject raptor9 = null;
+    [SerializeField] RuntimeAnimatorController runtimeControllerRaptor0 = null;
+    [SerializeField] RuntimeAnimatorController raptorSprite1 = null;
+    [SerializeField] RuntimeAnimatorController raptorSprite2 = null;
+    [SerializeField] RuntimeAnimatorController raptorSprite3 = null;
+    [SerializeField] RuntimeAnimatorController raptorSprite4 = null;
+    [SerializeField] RuntimeAnimatorController raptorSprite5 = null;
+    [SerializeField] RuntimeAnimatorController raptorSprite6 = null;
+    [SerializeField] RuntimeAnimatorController raptorSprite7 = null;
+    [SerializeField] RuntimeAnimatorController raptorSprite8 = null;
+    [SerializeField] RuntimeAnimatorController raptorSprite9 = null;
     GameObject spawnPoints = null;
     public int[] raptorsInPlay = new int[8];
     public int injuredRaptor;
     public int fightWinner;
     public int[] fighters = new int[2];
     public int[] top3 = new int[3];
+    public int[] theRestRacer = new int[5];
     public int quickPlayWinner;
     public int competitiveWinner;
     public int deathRaceWinner;
     public int ripRaptor;
+    public bool hasStarted = false;
     private int[] currentQueue = new int[8];
+    private GameObject[] currentGameObjectRaptors = new GameObject[8];
+    public Dictionary<int, RuntimeAnimatorController> tokenIdToSprite = new Dictionary<int, RuntimeAnimatorController>();
+
+    public GameObject GetRaptorGameObject(string value)
+    {
+        switch (value)
+        {
+            case "Bolt":
+                return raptor0;
+            case "Scaled":
+                return raptor1;
+            case "Undead":
+                return raptor2;
+            case "Flame":
+                return raptor3;
+            case "Marble":
+                return raptor2;
+            case "Blue":
+                return raptor5;
+            case "Slimy":
+                return raptor6;
+            case "Jigsaw":
+                return raptor7;
+            case "Rhodnite":
+                return raptor8;
+            case "Stripe":
+                return raptor9;
+            default:
+                return raptor0;
+        }
+    }
+
+    public RuntimeAnimatorController GetRaptorSprite(string value)
+    {
+        switch (value)
+        {
+            case "Bolt":
+                return runtimeControllerRaptor0;
+            case "Scaled":
+                return raptorSprite1;
+            case "Undead":
+                return raptorSprite2;
+            case "Flame":
+                return raptorSprite3;
+            case "Marble":
+                return raptorSprite2;
+            case "Blue":
+                return raptorSprite5;
+            case "Slimy":
+                return raptorSprite6;
+            case "Jigsaw":
+                return raptorSprite7;
+            case "Rhodnite":
+                return raptorSprite8;
+            case "Stripe":
+                return raptorSprite9;
+            default:
+                return runtimeControllerRaptor0;
+        }
+    }
 
     void Awake() {
         instance = this;
@@ -115,7 +221,7 @@ public class APICall : MonoBehaviour
     } 
 
     IEnumerator GetData_Coroutine() {
-        while (true) {
+        while (!hasStarted) {
             raptorsInPlay = new int[8];
             string uri = "https://test-raptor-nft-game.herokuapp.com/test/getCurrentQueue";
             using(UnityWebRequest request = UnityWebRequest.Get(uri)) 
@@ -141,16 +247,50 @@ public class APICall : MonoBehaviour
                             }
                         } else {
                             count++;
-                            GameObject instantiateCharacter = item == 1 ? raptor1 : raptor2;
-                            if (spawnPoints.transform.GetChild(index).gameObject.transform.childCount > 0) {
-                                Destroy(spawnPoints.transform.GetChild(index).gameObject.transform.GetChild(0).gameObject);
+                            string raptorSpriteUri = $"https://mrhemp.mypinata.cloud/ipfs/QmQvgt2BgLTYMVXdU8rWXaqi4jTY4CNczsxZQzboLKuxwq/{item.ToString()}.JSON";
+                            GameObject instantiateCharacter = null;
+                            using (UnityWebRequest raptorSpriteRequest = UnityWebRequest.Get(raptorSpriteUri))
+                            {
+                                yield return raptorSpriteRequest.SendWebRequest();
+                                if (raptorSpriteRequest.isNetworkError || raptorSpriteRequest.isHttpError)
+                                {
+                                    print(raptorSpriteRequest.error);
+                                }
+                                else
+                                {
+                                    RaptorJsonData DataResponse = RaptorJsonData.CreateFromJson(raptorSpriteRequest.downloadHandler.text);
+                                    foreach (Attribute attribute in DataResponse.attributes)
+                                    {
+                                        if (attribute.trait_type == "Body")
+                                        {
+                                            currentGameObjectRaptors[index] = GetRaptorGameObject(attribute.value);
+                                            tokenIdToSprite[item] = GetRaptorSprite(attribute.value);
+                                        }
+                                    }
+                                }
                             }
-                            var player = Instantiate(instantiateCharacter, spawnPoints.transform.GetChild(index).transform);
+                            raptorsInPlay[index] = item;
+                            index++;
                         }
-                        raptorsInPlay[index] = item;
-                        index++;
                     }
-                    if (count == 7) {
+                    int spawnPointIndex = 0;
+                    foreach (GameObject raptorGameObject in currentGameObjectRaptors)
+                    {
+                        if (spawnPoints != null)
+                        {
+                            if (raptorGameObject != null)
+                            {
+                                if (spawnPoints.transform.GetChild(spawnPointIndex).gameObject.transform.childCount > 0)
+                                {
+                                    Destroy(spawnPoints.transform.GetChild(spawnPointIndex).gameObject.transform.GetChild(0).gameObject);
+                                }
+
+                                Instantiate(raptorGameObject, spawnPoints.transform.GetChild(spawnPointIndex).transform);
+                                spawnPointIndex++;
+                            }
+                        }
+                    }
+                    if (count == 8) {
                         string fightWinnerUri = "https://test-raptor-nft-game.herokuapp.com/test/getFightWinner";
                         using (UnityWebRequest fightWinnerRequest = UnityWebRequest.Get(fightWinnerUri))
                         {
@@ -193,6 +333,16 @@ public class APICall : MonoBehaviour
                                                     top3[0] = top3Response.raptor_top_3[0];
                                                     top3[1] = top3Response.raptor_top_3[1];
                                                     top3[2] = top3Response.raptor_top_3[2];
+                                                    int[] raptorsInPlayTemp = raptorsInPlay;
+                                                    int restRacerIndex = 0;
+                                                    foreach (int raptor in raptorsInPlayTemp)
+                                                    {
+                                                        if (!top3.Contains(raptor))
+                                                        {
+                                                            theRestRacer[restRacerIndex] = raptor;
+                                                            restRacerIndex++;
+                                                        }
+                                                    }
                                                     string raceWinnerUri = "https://test-raptor-nft-game.herokuapp.com/test/getQPWinner";
                                                     using (UnityWebRequest raceWinnerRequest = UnityWebRequest.Get(raceWinnerUri))
                                                     {
@@ -205,6 +355,7 @@ public class APICall : MonoBehaviour
                                                         {
                                                             var raceWinnerResponse = DataRaceWinner.CreateFromJson(raceWinnerRequest.downloadHandler.text);
                                                             quickPlayWinner = raceWinnerResponse.qp_winner;
+                                                            hasStarted = true;
                                                             yield return SceneManager.LoadSceneAsync(1);
                                                         }
                                                     }

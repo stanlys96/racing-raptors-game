@@ -36,6 +36,7 @@ public class PlayerRacing : MonoBehaviour
     private float[] fifthPlaceSpeeds = { 1.1f, 1.03f, 0.9f, 0.95f, 0.9f, 0.85f, 1.1f };
     private float[] sixthPlaceSpeeds = { 1f, 1.03f, 1f, 0.9f, 0.9f, 0.88f, 1.1f };
     private float[] seventhPlaceSpeeds = { 1.1f, 1.03f, 0.9f, 0.88f, 0.85f, 0.9f, 1.1f };
+    private float[] eighthPlaceSpeeds = { 0.9f, 0.85f, 1.1f, 0.88f, 1f, 0.85f, 1f };
 
     // Start is called before the first frame update
     void Start()
@@ -47,33 +48,45 @@ public class PlayerRacing : MonoBehaviour
         {
             speeds = secondPlaceSpeeds;
         }
-        if (tokenId == 8)
+        if (tokenId == APICall.instance.top3[0])
         {
             speeds = firstPlaceSpeeds;
         }
-        if (tokenId == 7)
+        if (tokenId == APICall.instance.top3[1])
         {
             speeds = secondPlaceSpeeds;
         }
-        if (tokenId == 6)
+        if (tokenId == APICall.instance.top3[2])
         {
             speeds = thirdPlaceSpeeds;
         }
-        if (tokenId == 21)
+        if (tokenId == APICall.instance.theRestRacer[0])
         {
             speeds = fourthPlaceSpeeds;
         }
-        if (tokenId == 24)
+        if (tokenId == APICall.instance.theRestRacer[1])
         {
             speeds = fifthPlaceSpeeds;
         }
-        if (tokenId == 3)
+        if (tokenId == APICall.instance.theRestRacer[2])
         {
             speeds = sixthPlaceSpeeds;
         }
-        if (tokenId == 23)
+        if (tokenId == APICall.instance.theRestRacer[3])
         {
             speeds = seventhPlaceSpeeds;
+        }
+        if (tokenId == APICall.instance.theRestRacer[4])
+        {
+            speeds = eighthPlaceSpeeds;
+        }
+
+        foreach (KeyValuePair<int, RuntimeAnimatorController> entry in APICall.instance.tokenIdToSprite)
+        {
+            if (tokenId == entry.Key)
+            {
+                animator.runtimeAnimatorController = entry.Value;
+            }
         }
     }
 
