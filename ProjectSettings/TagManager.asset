@@ -10,6 +10,9 @@ TagManager:
   - MainPlayer
   - FinishLine
   - MainObject
+  - Raptor
+  - Fighter1
+  - Fighter2
   layers:
   - Default
   - TransparentFX

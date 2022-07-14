@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerRacing : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class PlayerRacing : MonoBehaviour
     public bool canJump = false;
     public GameObject target;
     public bool isMain = false;
+    public Text uiTokenId;
 
     public SpriteRenderer spriteRenderer;
     Rigidbody2D rb;
@@ -37,6 +39,7 @@ public class PlayerRacing : MonoBehaviour
     private float[] sixthPlaceSpeeds = { 1f, 1.03f, 1f, 0.9f, 0.9f, 0.88f, 1.1f };
     private float[] seventhPlaceSpeeds = { 1.1f, 1.03f, 0.9f, 0.88f, 0.85f, 0.9f, 1.1f };
     private float[] eighthPlaceSpeeds = { 0.9f, 0.85f, 1.1f, 0.88f, 1f, 0.85f, 1f };
+    private bool isRotating = false;
 
     // Start is called before the first frame update
     void Start()
@@ -44,9 +47,13 @@ public class PlayerRacing : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        if (uiTokenId != null)
+        {
+            uiTokenId.text = tokenId.ToString();
+        }
         if (gameObject.tag == "MainObject")
         {
-            speeds = secondPlaceSpeeds;
+            speeds = firstPlaceSpeeds;
         }
         if (tokenId == APICall.instance.top3[0])
         {
@@ -80,6 +87,14 @@ public class PlayerRacing : MonoBehaviour
         {
             speeds = eighthPlaceSpeeds;
         }
+        if (tokenId == APICall.instance.fighters[0])
+        {
+            gameObject.tag = "Fighter1";
+        }
+        if (tokenId == APICall.instance.fighters[1])
+        {
+            gameObject.tag = "Fighter2";
+        }
 
         foreach (KeyValuePair<int, RuntimeAnimatorController> entry in APICall.instance.tokenIdToSprite)
         {
@@ -88,6 +103,20 @@ public class PlayerRacing : MonoBehaviour
                 animator.runtimeAnimatorController = entry.Value;
             }
         }
+    }
+
+    IEnumerator DoRotation(float speed, float amount, Vector3 axis)
+    {
+        isRotating = true;
+        float rot = 0f;
+        while (rot < amount)
+        {
+            yield return null;
+            float delta = Mathf.Min(speed * Time.deltaTime, amount - rot);
+            transform.RotateAround(target.transform.position, axis, delta);
+            rot += delta;
+        }
+        isRotating = false;
     }
 
     // Update is called once per frame
@@ -99,6 +128,10 @@ public class PlayerRacing : MonoBehaviour
         {
             timeSinceLastChangeSeason = 0f;
             index++;
+            if (index == speeds.Length)
+            {
+                index = 0;
+            }
         }
         float speed = isFinished ? 0f : speeds[index];
         //animator.SetBool("isMoving", true);
@@ -116,8 +149,16 @@ public class PlayerRacing : MonoBehaviour
 
         //    }
         //}
-
-        transform.Translate(Vector2.up * speed * Time.deltaTime);
+        if (tokenId == APICall.instance.fighters[0] && index == 1)
+        {
+            GameObject targetFighter = GameObject.FindGameObjectWithTag("Fighter2");
+            transform.position = Vector2.MoveTowards(transform.position, targetFighter.transform.position, speed * Time.deltaTime);
+            transform.RotateAround(targetFighter.transform.position, Vector3.one, 1f);
+        } 
+        else
+        {
+            transform.Translate(Vector2.up * speed * Time.deltaTime);
+        }
 
         //if (gameObject.name == "7_0 (1)")
         //{

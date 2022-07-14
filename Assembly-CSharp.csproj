@@ -59,10 +59,11 @@
     <Compile Include="Assets\FollowCamera.cs" />
     <Compile Include="Assets\Scripts\PlayerRacing.cs" />
     <Compile Include="Assets\Scripts\APICall.cs" />
+    <Compile Include="Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\SwordAttack.cs" />
     <Compile Include="Assets\Scripts\PlayerController.cs" />
     <Compile Include="Assets\Scripts\Fighter.cs" />
-    <Compile Include="Assets\Scripts\GameManager.cs" />
+    <Compile Include="Assets\Scripts\FinishLine.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

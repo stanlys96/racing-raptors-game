@@ -11,6 +11,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 6-Slimy-WithScript
       objectReference: {fileID: 0}
+    - target: {fileID: 2986717217031264394, guid: ef5fa8d90e07b504eb4eb6e61ad971c1, type: 3}
+      propertyPath: m_TagString
+      value: Raptor
+      objectReference: {fileID: 0}
     - target: {fileID: 2986717217031264397, guid: ef5fa8d90e07b504eb4eb6e61ad971c1, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -62,6 +66,32 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 2986717217031264394, guid: ef5fa8d90e07b504eb4eb6e61ad971c1, type: 3}
   m_PrefabInstance: {fileID: 5655867641430760031}
   m_PrefabAsset: {fileID: 0}
+--- !u!61 &6511479455618850453
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7426258607087960789}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 10.810557, y: 10.8}
+    newSize: {x: 10.810557, y: 10.8}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 10.810557, y: 10.8}
+  m_EdgeRadius: 0
 --- !u!114 &7644634628408390253
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -74,5 +104,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 650733e437de3f343b7291f337344c17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 1
+  maxSpeed: 1
+  minSpeed: 0.9
   tokenId: 0
+  canJump: 0
+  target: {fileID: 0}
+  isMain: 0
+  spriteRenderer: {fileID: 0}
+  speeds: []

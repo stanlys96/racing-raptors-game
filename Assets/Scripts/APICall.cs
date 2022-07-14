@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using UnityEngine.SceneManagement;
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 [System.Serializable]
 public class Data
@@ -103,6 +104,34 @@ public class Attribute
     public string value;
 }
 
+public static class ArrayExt
+{
+    public static T[] GetRow<T>(this T[,] array, int row)
+    {
+        if (!typeof(T).IsPrimitive)
+            throw new InvalidOperationException("Not supported for managed types.");
+
+        if (array == null)
+            throw new ArgumentNullException("array");
+
+        int cols = array.GetUpperBound(1) + 1;
+        T[] result = new T[cols];
+
+        int size;
+
+        if (typeof(T) == typeof(bool))
+            size = 1;
+        else if (typeof(T) == typeof(char))
+            size = 2;
+        else
+            size = Marshal.SizeOf<T>();
+
+        Buffer.BlockCopy(array, row * cols * size, result, 0, cols * size);
+
+        return result;
+    }
+}
+
 
 public class APICall : MonoBehaviour
 {
@@ -145,6 +174,47 @@ public class APICall : MonoBehaviour
     private int[] currentQueue = new int[8];
     private GameObject[] currentGameObjectRaptors = new GameObject[8];
     public Dictionary<int, RuntimeAnimatorController> tokenIdToSprite = new Dictionary<int, RuntimeAnimatorController>();
+
+    public double GetAverage(int[] arr)
+    {
+        double average = 0.0;
+        for (int i = 0; i < arr.Length; i++)
+        {
+            average += arr[i];
+        }
+        return average / arr.Length;
+    }
+
+    public int GetWeight(double[] arr, int position, int index)
+    {
+        int below = 0;
+        int above = 0;
+
+        for (int i = 0; i < arr.Length; i++)
+        {
+            if (i == index)
+            {
+                continue;
+            }
+            else if (arr[i] < arr[index])
+            {
+                below += 1;
+            }
+            else if (arr[i] > arr[index])
+            {
+                above += 1;
+            }
+        }
+
+        if (position < arr.Length - below)
+        {
+            return 1; //faster speed
+        }
+        else
+        {
+            return -1; //slower speed
+        }
+    }
 
     public GameObject GetRaptorGameObject(string value)
     {
@@ -335,6 +405,7 @@ public class APICall : MonoBehaviour
                                                     top3[2] = top3Response.raptor_top_3[2];
                                                     int[] raptorsInPlayTemp = raptorsInPlay;
                                                     int restRacerIndex = 0;
+                                                    int[] endingPositions = new int[8];
                                                     foreach (int raptor in raptorsInPlayTemp)
                                                     {
                                                         if (!top3.Contains(raptor))
@@ -343,6 +414,150 @@ public class APICall : MonoBehaviour
                                                             restRacerIndex++;
                                                         }
                                                     }
+                                                    int[] mergeArray = top3.Concat(theRestRacer).ToArray();
+
+                                                    //for (int i = 0; i < currentQueue.Length; i++)
+                                                    //{
+                                                    //    if (currentQueue[i] == mergeArray[0])
+                                                    //    {
+                                                    //        endingPositions[i] = 1;
+                                                    //    }
+                                                    //    else if (currentQueue[i] == mergeArray[1])
+                                                    //    {
+                                                    //        endingPositions[i] = 2;
+                                                    //    }
+                                                    //    else if (currentQueue[i] == mergeArray[2])
+                                                    //    {
+                                                    //        endingPositions[i] = 3;
+                                                    //    }
+                                                    //    else if (currentQueue[i] == mergeArray[3])
+                                                    //    {
+                                                    //        endingPositions[i] = 4;
+                                                    //    }
+                                                    //    else if (currentQueue[i] == mergeArray[4])
+                                                    //    {
+                                                    //        endingPositions[i] = 5;
+                                                    //    }
+                                                    //    else if (currentQueue[i] == mergeArray[5])
+                                                    //    {
+                                                    //        endingPositions[i] = 6;
+                                                    //    }
+                                                    //    else if (currentQueue[i] == mergeArray[6])
+                                                    //    {
+                                                    //        endingPositions[i] = 7;
+                                                    //    }
+                                                    //    else if (currentQueue[i] == mergeArray[7])
+                                                    //    {
+                                                    //        endingPositions[i] = 8;
+                                                    //    }
+                                                    //}
+
+                                                    //for (int j = 0; j < endingPositions.Length; j++)
+                                                    //{
+                                                    //    if (currentQueue[j] == fighters[0])
+                                                    //    {
+                                                    //        endingPositions[6] = endingPositions[j];
+                                                    //        endingPositions[j] = 7;
+                                                    //    }
+                                                    //    if (currentQueue[j] == fighters[1])
+                                                    //    {
+                                                    //        endingPositions[7] = endingPositions[j];
+                                                    //        endingPositions[j] = 8;
+                                                    //    }
+                                                    //}
+                                                    //2 dimentsional array 5 arrays, 8 values per array
+                                                    //int[,] speed = new int[6, 8];
+
+                                                    ////The upper random bound
+                                                    //int upperBound = 10;
+
+                                                    ////The lower random bound
+                                                    //int lowerBound = 3;
+
+                                                    ////Temporary array for storing data before moving into final array
+                                                    //int[] tempArr = new int[8];
+
+                                                    ////Array for holding the average speed for each raptor at a given speed change interval
+                                                    //double[,] averageSpeedArr = new double[6, 8];
+
+
+                                                    ////Iterate 5 times for 5 speed changes
+                                                    //for (int j = 0; j < 5; j++)
+                                                    //{
+
+                                                    //    //Iterate through the raptors
+                                                    //    for (int i = 0; i < endingPositions.Length; i++)
+                                                    //    {
+
+                                                    //        //First 2 speed changes are random
+                                                    //        if (j < 2)
+                                                    //        {
+
+                                                    //            //Get random
+                                                    //            System.Random rnd = new System.Random();
+                                                    //            int tempSpeed = rnd.Next(lowerBound, upperBound);
+
+                                                    //            //Assign to temp array
+                                                    //            tempArr[i] = tempSpeed;
+                                                    //        }
+                                                    //        else
+                                                    //        {
+                                                    //            //Temp array
+                                                    //            int[] arr = new int[8];
+
+                                                    //            //get an array fo this raptors speeds so far
+                                                    //            for (int x = 0; x <= j; x++)
+                                                    //            {
+                                                    //                arr[x] = speed[x, i];
+                                                    //            }
+
+                                                    //            //find the average
+                                                    //            double average = GetAverage(arr);
+
+                                                    //            // assign the average to the average speed array for a given raptor
+                                                    //            averageSpeedArr[j, i] = average;
+
+                                                    //        }
+                                                    //    }
+
+                                                        //If we are past the first 2 speed changes
+                                                        //if (j >= 2)
+                                                        //{
+
+                                                        //    //Iterate through raptors
+                                                        //    for (int y = 0; y < speed.Length; y++)
+                                                        //    {
+
+                                                        //        //Find whether the raptor needs to go faster or slower to reach the given finishing positions
+                                                        //        int weight = GetWeight(averageSpeedArr.GetRow(j), endingPositions[y], index);
+
+                                                        //        //If raptor go fast
+                                                        //        if (weight > 0)
+                                                        //        {
+                                                        //            //increase average speed by 20% for next speed
+                                                        //            speed[j, y] = (int)(averageSpeedArr[j, y] * 1.2);
+                                                        //        }
+                                                        //        else
+                                                        //        {
+                                                        //            //decrease average speed by 20%
+                                                        //            speed[j, y] = (int)(averageSpeedArr[j, y] * 0.8);
+                                                        //        }
+
+                                                        //    }
+
+                                                        //    //If still on first 2 speed changes
+                                                        //}
+                                                        //else
+                                                        //{
+                                                        //    //assign speed
+                                                        //    for (int i = 0; i < tempArr.Length; i++)
+                                                        //    {
+                                                        //        speed[j, i] = tempArr[i];
+                                                        //    }
+                                                        //}
+
+                                                    }
+
                                                     string raceWinnerUri = "https://test-raptor-nft-game.herokuapp.com/test/getQPWinner";
                                                     using (UnityWebRequest raceWinnerRequest = UnityWebRequest.Get(raceWinnerUri))
                                                     {
@@ -372,4 +587,4 @@ public class APICall : MonoBehaviour
             yield return new WaitForSecondsRealtime(30);
         }
     }
-}
+
